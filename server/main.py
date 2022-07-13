@@ -100,7 +100,8 @@ async def plot_ws_endpoint(websocket: WebSocket, background_tasks: BackgroundTas
                     print('start checking')
                     while r.status == 'PENDING':
                         pass
-                    print('finish checking')
+                    print('finish checking', r.status)
+                    print(r.get())
                     async def send():
                         print("start send ready")
                         await websocket.send_json({'e': 'ready'})
@@ -112,10 +113,6 @@ async def plot_ws_endpoint(websocket: WebSocket, background_tasks: BackgroundTas
                     loop.run_until_complete(send())
                 th = threading.Thread(target=ch)
                 th.start()
-
-                        
-                    
-
 
         elif data['e'] == 'cancel':
             print("cancel plot")

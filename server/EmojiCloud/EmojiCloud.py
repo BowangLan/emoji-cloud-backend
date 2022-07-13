@@ -321,7 +321,7 @@ def rename_emoji_image_in_unicode(dict_weight):
     dict_rename = {}
     for im_name in dict_weight:
         if im_name[:2].lower() == 'u+':
-            dict_rename[im_name + '.PNG'] = dict_weight[im_name]
+            dict_rename[im_name + '.png'] = dict_weight[im_name]
             continue
         # replace ',' and ' '
         im_name_proc = im_name.replace(',','-')
@@ -333,7 +333,7 @@ def rename_emoji_image_in_unicode(dict_weight):
         else:
             im_rename = im_name_proc.upper()
             if '.PNG' not in im_rename:
-                im_rename += '.PNG'
+                im_rename += '.png'
             if 'U+' not in im_rename:
                 im_rename = 'U+' + '-U+'.join(im_rename.split('-'))
         dict_rename[im_rename] = dict_weight[im_name]
