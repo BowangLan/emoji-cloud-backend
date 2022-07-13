@@ -4,123 +4,122 @@ import copy
 import math
 import collections
 import EmojiCloud
-from .EmojiCloud import resize_img_based_weight, OrderedSet, generate_resized_emoji_images, rename_emoji_image_in_unicode
 
 from .util import *
 
 
-# def resize_img_based_weight(im_read, weight):
-#     """resize original image based on its weight
+def resize_img_based_weight(im_read, weight):
+    """resize original image based on its weight
 
-#     Args:
-#         im_read (2D list): the image in 2D array with each cell of RGBA
-#         weight (float): weight of the image 
+    Args:
+        im_read (2D list): the image in 2D array with each cell of RGBA
+        weight (float): weight of the image 
 
-#     Returns:
-#         im_resize (2D list): the image in 2D array with each cell of RGBA: the image width
-#     """
-#     width, height = im_read.getdata().size
-#     width_resize = int(width*weight) if int(width*weight) > 0 else 1
-#     height_resize = int(height*weight) if int(height*weight) > 0 else 1
-#     im_resize = im_read.resize((width_resize, height_resize), Image.ANTIALIAS)
-#     return im_resize
-
-
-# class OrderedSet(collections.Set):
-#     def __init__(self, iterable=()):
-#         self.d = collections.OrderedDict.fromkeys(iterable)
-
-#     def __len__(self):
-#         return len(self.d)
-
-#     def __contains__(self, element):
-#         return element in self.d
-
-#     def __iter__(self):
-#         return iter(self.d)
+    Returns:
+        im_resize (2D list): the image in 2D array with each cell of RGBA: the image width
+    """
+    width, height = im_read.getdata().size
+    width_resize = int(width*weight) if int(width*weight) > 0 else 1
+    height_resize = int(height*weight) if int(height*weight) > 0 else 1
+    im_resize = im_read.resize((width_resize, height_resize), Image.ANTIALIAS)
+    return im_resize
 
 
-# def rename_emoji_image_in_unicode(dict_weight):
-#     """rename emoji image name in unicode 
+class OrderedSet(collections.abc.Set):
+    def __init__(self, iterable=()):
+        self.d = collections.OrderedDict.fromkeys(iterable)
 
-#     Args:
-#         dict_weight (dict): key: emoji by unicode or codepoint, value: emoji weight 
+    def __len__(self):
+        return len(self.d)
 
-#     Returns:
-#         dict_rename (dict): key: renamed emoji image by codepoint, value: emoji weight 
-#     """
-#     dict_rename = {}
-#     for im_name in dict_weight:
-#         if im_name[:2].lower() == 'u+':
-#             dict_rename[im_name + '.PNG'] = dict_weight[im_name]
-#             continue
-#         # replace ',' and ' '
-#         im_name_proc = im_name.replace(',', '-')
-#         im_name_proc = im_name_proc.replace(' ', '')
-#         # emoji by unicode
-#         if not im_name_proc.replace('-', '').isalnum():
-#             im_rename = 'U+' + '-U+'.join('{:X}'.format(ord(_))
-#                                           for _ in im_name_proc) + '.PNG'
-#         # emoji by codepoint
-#         else:
-#             im_rename = im_name_proc.upper()
-#             if '.PNG' not in im_rename:
-#                 im_rename += '.PNG'
-#             if 'U+' not in im_rename:
-#                 im_rename = 'U+' + '-U+'.join(im_rename.split('-'))
-#         dict_rename[im_rename] = dict_weight[im_name]
-#     return dict_rename
+    def __contains__(self, element):
+        return element in self.d
+
+    def __iter__(self):
+        return iter(self.d)
 
 
-# def generate_resized_emoji_images(path_img_raw, dict_weight, canvas_area, dict_customized, relax_ratio=1.5):
-#     """generate the resized emoji images based on weights
+def rename_emoji_image_in_unicode(dict_weight):
+    """rename emoji image name in unicode 
 
-#     Args:
-#         path_img_raw (string): the path of raw emojis 
-#         dict_weight (dict): key: emoji image name in unicode, value: emoji weight 
-#         canvas_area (float): the canvas area 
-#         dict_customized (dict): key: emoji image name in unicode, value: the path of customized emoji image
-#         relax_ratio (float, optional): control the plotting sparsity. Defaults to 1.5.
+    Args:
+        dict_weight (dict): key: emoji by unicode or codepoint, value: emoji weight 
 
-#     Returns:
-#         list_sorted_emoji: a list of sorted emojis by their weights
-#         list_resize_img: a list of resize image array 
-#     """
-#     # process emoji image name in unicode
-#     dict_weight = rename_emoji_image_in_unicode(dict_weight)
-#     dict_customized = rename_emoji_image_in_unicode(dict_customized)
-#     # normalize weight
-#     weight_sum = sum([v for v in dict_weight.values()])
-#     dict_weight = {name: w / weight_sum for name,w in dict_weight.items()}
-#     # for im_name in dict_weight:
-#     #     dict_weight[im_name] = dict_weight[im_name]/weight_sum
-#     # calculate zoom in/out ratio
-#     norm_area_sum = 0
-#     for im_name in dict_weight:
-#         if im_name not in dict_customized:
-#             im_read = Image.open(EmojiCloud.__path__[
-#                                  0] + '/' + os.path.join(path_img_raw, im_name))
-#         else:
-#             im_read = Image.open(dict_customized[im_name])
-#         width, height = im_read.getdata().size
-#         norm_area_sum += width*height*(dict_weight[im_name]**2)
-#     zoom_ratio = math.sqrt(canvas_area/norm_area_sum)/relax_ratio
-#     for im_name in dict_weight:
-#         dict_weight[im_name] = dict_weight[im_name]*zoom_ratio
-#     list_sorted_emoji = sort_dictionary_by_value(dict_weight, reverse=True)
-#     # resize images
-#     list_resize_img = []
-#     for item in list_sorted_emoji:
-#         im_name, weight = item[0], item[1]
-#         if im_name not in dict_customized:
-#             im_read = Image.open(EmojiCloud.__path__[
-#                                  0] + '/' + os.path.join(path_img_raw, im_name))
-#         else:
-#             im_read = Image.open(dict_customized[im_name])
-#         im_read = im_read.convert('RGBA')
-#         resize_img = resize_img_based_weight(im_read, weight)
-#         list_resize_img.append(resize_img)
-#     return list_sorted_emoji, list_resize_img
+    Returns:
+        dict_rename (dict): key: renamed emoji image by codepoint, value: emoji weight 
+    """
+    dict_rename = {}
+    for im_name in dict_weight:
+        if im_name[:2].lower() == 'u+':
+            dict_rename[im_name + '.PNG'] = dict_weight[im_name]
+            continue
+        # replace ',' and ' '
+        im_name_proc = im_name.replace(',', '-')
+        im_name_proc = im_name_proc.replace(' ', '')
+        # emoji by unicode
+        if not im_name_proc.replace('-', '').isalnum():
+            im_rename = 'U+' + '-U+'.join('{:X}'.format(ord(_))
+                                          for _ in im_name_proc) + '.PNG'
+        # emoji by codepoint
+        else:
+            im_rename = im_name_proc.upper()
+            if '.PNG' not in im_rename:
+                im_rename += '.PNG'
+            if 'U+' not in im_rename:
+                im_rename = 'U+' + '-U+'.join(im_rename.split('-'))
+        dict_rename[im_rename] = dict_weight[im_name]
+    return dict_rename
+
+
+def generate_resized_emoji_images(path_img_raw, dict_weight, canvas_area, dict_customized, relax_ratio=1.5):
+    """generate the resized emoji images based on weights
+
+    Args:
+        path_img_raw (string): the path of raw emojis 
+        dict_weight (dict): key: emoji image name in unicode, value: emoji weight 
+        canvas_area (float): the canvas area 
+        dict_customized (dict): key: emoji image name in unicode, value: the path of customized emoji image
+        relax_ratio (float, optional): control the plotting sparsity. Defaults to 1.5.
+
+    Returns:
+        list_sorted_emoji: a list of sorted emojis by their weights
+        list_resize_img: a list of resize image array 
+    """
+    # process emoji image name in unicode
+    dict_weight = rename_emoji_image_in_unicode(dict_weight)
+    dict_customized = rename_emoji_image_in_unicode(dict_customized)
+    # normalize weight
+    weight_sum = sum([v for v in dict_weight.values()])
+    dict_weight = {name: w / weight_sum for name,w in dict_weight.items()}
+    # for im_name in dict_weight:
+    #     dict_weight[im_name] = dict_weight[im_name]/weight_sum
+    # calculate zoom in/out ratio
+    norm_area_sum = 0
+    for im_name in dict_weight:
+        if im_name not in dict_customized:
+            im_read = Image.open(EmojiCloud.__path__[
+                                 0] + '/' + os.path.join(path_img_raw, im_name))
+        else:
+            im_read = Image.open(dict_customized[im_name])
+        width, height = im_read.getdata().size
+        norm_area_sum += width*height*(dict_weight[im_name]**2)
+    zoom_ratio = math.sqrt(canvas_area/norm_area_sum)/relax_ratio
+    for im_name in dict_weight:
+        dict_weight[im_name] = dict_weight[im_name]*zoom_ratio
+    list_sorted_emoji = sort_dictionary_by_value(dict_weight, reverse=True)
+    # resize images
+    list_resize_img = []
+    for item in list_sorted_emoji:
+        im_name, weight = item[0], item[1]
+        if im_name not in dict_customized:
+            im_read = Image.open(EmojiCloud.__path__[
+                                 0] + '/' + os.path.join(path_img_raw, im_name))
+        else:
+            im_read = Image.open(dict_customized[im_name])
+        im_read = im_read.convert('RGBA')
+        resize_img = resize_img_based_weight(im_read, weight)
+        list_resize_img.append(resize_img)
+    return list_sorted_emoji, list_resize_img
 
 def plot_emoji_cloud_given_relax_ratio(path_img_raw, canvas_img, canvas_w, canvas_h, canvas_area, dict_weight, list_canvas_pix, map_occupied, dict_customized, thold_alpha_bb, relax_ratio):
     """plot emoji cloud
