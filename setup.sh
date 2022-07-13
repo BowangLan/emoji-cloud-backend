@@ -1,5 +1,5 @@
 sudo apt update && sudo apt upgrade
-sudo add-apt-repository ppa:deadsnakes/ppa
+sudo add-apt-repository -y ppa:deadsnakes/ppa
 sudo apt-get install -y python3 python3-pip python3-venv nodejs npm nginx redis-server
 sudo npm i -g pm2
 
