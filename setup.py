@@ -9,7 +9,7 @@ content = '''
 server {
   listen 80;
 
-  server_name 18.236.231.247;
+  server_name {HOST_IP};
   # server_name _;
 
   location /api {
