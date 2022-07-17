@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 
 
 HOST_IP = sys.argv[1]
