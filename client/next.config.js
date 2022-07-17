@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   env: {
     PRODUCTION: TRUE,
-    HOST_IP: ''
+    HOST_IP: 'localhost:8000'
   }
 }
 
