@@ -8,5 +8,5 @@ npm install
 cd ..
 
 cd server
-pip3 install fastapi 'uvicorn[standard]' Pillow matplotlib numpy pandas 'celery[redis]'
+pip3 install fastapi 'uvicorn[standard]' Pillow matplotlib numpy pandas 'celery[redis]' python-multipart
 cd ..
