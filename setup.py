@@ -5,7 +5,7 @@ import sys
 HOST_IP = sys.argv[1]
 
 
-nginx_default_conf_content = '''
+content = '''
 server {
   listen 80;
 
