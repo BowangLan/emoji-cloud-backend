@@ -19,7 +19,7 @@ import {
 } from "antd";
 import FIleReader from "../components/FIleReader";
 
-let backend_host = process.env.HOST_IP || "localhost:8000";
+let backend_host = process.env.HOST_IP;
 if (process.env.PRODUCTION === 'TRUE') {
   backend_host += '/api';
 } 
