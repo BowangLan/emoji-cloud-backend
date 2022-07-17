@@ -10,7 +10,6 @@ server {
   listen 80;
 
   server_name {HOST_IP};
-  # server_name _;
 
   location /api {
     rewrite ^/api/(.*)$ /$1 break;
