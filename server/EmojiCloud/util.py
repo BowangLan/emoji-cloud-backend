@@ -1,5 +1,21 @@
 import math
 from PIL import Image
+from rich.console import Console
+from timeit import default_timer as timer
+
+global console
+console = Console()
+
+
+def timeit(f):
+    def wrapper(*args, **kwargs):
+        start = timer()
+        r = f(*args, **kwargs)
+        dur = timer() - start
+        console.log("{} took {:.4f}".format(f.__name__, dur))
+        return r
+    return wrapper
+
 
 def distance_between_two_points(x_1, y_1, x_2, y_2):
     """calculate the distance between two points
@@ -35,6 +51,7 @@ def sort_dictionary_by_value(dict_sort, reverse=True):
     return list_tuple_sorted
 
 
+@timeit
 def parse_image_by_array(im):
     """parse the given image 
 
@@ -42,8 +59,6 @@ def parse_image_by_array(im):
         im (2D list): the image in 2D array with each cell of RGBA
 
     Returns:
-        width: the image width
-        height: the image height
         dict_opacity: key: coordinate, value: the RGB value
     """
     # read image
@@ -52,15 +67,15 @@ def parse_image_by_array(im):
     # identify transparent pixels
     dict_opacity = {}  # key: coordinate, value: RGB value
     for index, pixel in enumerate(im_data):
-        x = index % width
-        y = int(index / width)
         # opacity coordinates along with RGB values
         if (pixel[3] != 0):
+            x = index % im.width
+            y = int(index / width)
             dict_opacity[tuple([x, y])] = pixel
-    return width, height, dict_opacity
+    return dict_opacity
 
 
-
+@timeit
 def remove_pixel_outside_bb(im, thold_alpha):
     """remove all pixels outside the bounding box
 

@@ -1,4 +1,3 @@
-import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState, useEffect, useRef } from "react";
@@ -18,6 +17,7 @@ import {
   Col,
 } from "antd";
 import FIleReader from "../components/FIleReader";
+// import { useConnection } from "../store";
 
 let backend_host = process.env.HOST_IP;
 if (process.env.PRODUCTION === 'TRUE') {
@@ -55,7 +55,8 @@ export default function Home() {
   const [formValues, setFormValues] = useState(formInitialValues);
   const router = useRouter();
 
-  const ws = useRef();
+  // const ws = useRef();
+  // const { ws, connect } = useConnection((state) => ({ws: state.ws, connect: state.connect}))
   const formRef = useRef();
 
   const startConnect = (callback) => {
@@ -71,7 +72,10 @@ export default function Home() {
       message.warning("Connection closed");
       console.log("ws closed");
     });
-    ws.current.addEventListener("message", (e) => {
+    ws.current.addEventListener("message", handleMessage);
+  };
+
+  const handleMessage = (e) => {
       console.log("got ws message", e);
       const data = JSON.parse(e.data);
       if (data.e === "ready") {
@@ -89,8 +93,7 @@ export default function Home() {
         message.error(data.msg);
         setProcessing(() => false);
       }
-    });
-  };
+  }
 
   useEffect(() => {
     if (!ws.current) {

@@ -8,6 +8,7 @@ import EmojiCloud
 from .util import *
 
 
+@timeit
 def resize_img_based_weight(im_read, weight):
     """resize original image based on its weight
 
@@ -39,6 +40,7 @@ class OrderedSet(collections.abc.Set):
         return iter(self.d)
 
 
+@timeit
 def rename_emoji_image_in_unicode(dict_weight):
     """rename emoji image name in unicode 
 
@@ -70,7 +72,7 @@ def rename_emoji_image_in_unicode(dict_weight):
         dict_rename[im_rename] = dict_weight[im_name]
     return dict_rename
 
-
+@timeit
 def generate_resized_emoji_images(path_img_raw, dict_weight, canvas_area, dict_customized, relax_ratio=1.5):
     """generate the resized emoji images based on weights
 
@@ -85,6 +87,7 @@ def generate_resized_emoji_images(path_img_raw, dict_weight, canvas_area, dict_c
         list_sorted_emoji: a list of sorted emojis by their weights
         list_resize_img: a list of resize image array 
     """
+    print("generate resized")
     # process emoji image name in unicode
     dict_weight = rename_emoji_image_in_unicode(dict_weight)
     dict_customized = rename_emoji_image_in_unicode(dict_customized)
@@ -121,6 +124,8 @@ def generate_resized_emoji_images(path_img_raw, dict_weight, canvas_area, dict_c
         list_resize_img.append(resize_img)
     return list_sorted_emoji, list_resize_img
 
+
+@timeit
 def plot_emoji_cloud_given_relax_ratio(path_img_raw, canvas_img, canvas_w, canvas_h, canvas_area, dict_weight, list_canvas_pix, map_occupied, dict_customized, thold_alpha_bb, relax_ratio):
     """plot emoji cloud
 
@@ -141,6 +146,7 @@ def plot_emoji_cloud_given_relax_ratio(path_img_raw, canvas_img, canvas_w, canva
         canvas_img: the final image of canvas
         count_plot: the count of plotted emojis 
     """
+    print('plot given relax ratio')
     # new_list_canvas_pix = list_canvas_pix.copy()
     new_list_canvas_pix = copy.deepcopy(list_canvas_pix)
     # new_canvas_img = canvas_img.copy()
@@ -150,16 +156,16 @@ def plot_emoji_cloud_given_relax_ratio(path_img_raw, canvas_img, canvas_w, canva
     list_sorted_emoji, list_resize_img = generate_resized_emoji_images(path_img_raw, dict_weight, canvas_area, dict_customized, relax_ratio)
     # plot each emoji 
     count_plot = 0 
-    for index, item in enumerate(list_sorted_emoji):
+    for index, _ in enumerate(list_sorted_emoji):
         # fail to plot the last emoji image 
         if (index != count_plot):
             break 
-        im_name, weight = item[0], item[1]
+        # im_name, weight = item[0], item[1]
         # remove pixel outside bounding box 
         im = list_resize_img[index]
         img_within_bb = remove_pixel_outside_bb(im, thold_alpha_bb)
         # parse emoji image 
-        img_width, img_height, dict_opacity = parse_image_by_array(img_within_bb)
+        dict_opacity = parse_image_by_array(img_within_bb)
         # get the center point of the emoji image 
         list_x = []
         list_y = []
@@ -223,12 +229,14 @@ def plot_emoji_cloud_given_relax_ratio(path_img_raw, canvas_img, canvas_w, canva
     return new_canvas_img, count_plot
 
 
+@timeit
 def plot_dense_emoji_cloud(canvas, path_img_raw, dict_weight, dict_customized: dict = {}, thold_alpha_bb: int = 4, num_try=20, step_size=0.1):
     # a sorted list of available pixel positions for plotting
     list_canvas_pix = canvas.calculate_sorted_canvas_pix_for_plotting()
     # plot emoji cloud with an increasing relax_ratio with a fixed step size
     for i in range(num_try):
         relax_ratio = 1 + step_size*i
+        print('try relax ratio {}'.format(i))
         canvas_img_plot, count_plot = plot_emoji_cloud_given_relax_ratio(path_img_raw, canvas.img, canvas.w, canvas.h, canvas.area, dict_weight, list_canvas_pix, canvas.map_occupied, dict_customized, thold_alpha_bb, relax_ratio)
         # plot all emojis successfully 
         if (count_plot == len(dict_weight)):
