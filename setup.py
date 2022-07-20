@@ -33,6 +33,8 @@ with open('/etc/nginx/conf.d/default.conf', 'w') as f:
 with open('client/next.config.js', 'r') as f:
     content = f.read()
 new_content = re.sub(r"HOST_IP: '.*?'", "HOST_IP: '{}'".format(HOST_IP), content)
+new_content = re.sub("DEV: \"TRUE\"", "DEV: \"FALSE\"", content)
 with open('client/next.config.js', 'w') as f:
     f.write(new_content)
     
+
