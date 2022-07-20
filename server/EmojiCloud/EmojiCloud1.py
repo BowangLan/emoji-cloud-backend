@@ -147,6 +147,7 @@ def plot_emoji_cloud_given_relax_ratio(path_img_raw, canvas_img, canvas_w, canva
         count_plot: the count of plotted emojis 
     """
     print('plot given relax ratio')
+    global console
     # new_list_canvas_pix = list_canvas_pix.copy()
     new_list_canvas_pix = copy.deepcopy(list_canvas_pix)
     # new_canvas_img = canvas_img.copy()
@@ -163,9 +164,12 @@ def plot_emoji_cloud_given_relax_ratio(path_img_raw, canvas_img, canvas_w, canva
         # im_name, weight = item[0], item[1]
         # remove pixel outside bounding box 
         im = list_resize_img[index]
+        console.log('for emoji begin')
+        
         img_within_bb = remove_pixel_outside_bb(im, thold_alpha_bb)
         # parse emoji image 
         dict_opacity = parse_image_by_array(img_within_bb)
+
         # get the center point of the emoji image 
         list_x = []
         list_y = []
@@ -175,6 +179,7 @@ def plot_emoji_cloud_given_relax_ratio(path_img_raw, canvas_img, canvas_w, canva
         center = sum(list_x)/len(list_x), sum(list_y)/len(list_y)
         img_center_x = int(center[0])
         img_center_y = int(center[1])
+
         # sort opacity point by distant to the center point
         dict_dist_img_center = {} # key: point, value: point to the image center 
         for (x, y) in dict_opacity:
@@ -183,6 +188,7 @@ def plot_emoji_cloud_given_relax_ratio(path_img_raw, canvas_img, canvas_w, canva
             dict_dist_img_center[(x, y)] = dist
         list_img_pix_dist = sort_dictionary_by_value(dict_dist_img_center, reverse = True)
         list_img_pix = [x_y for (x_y, dist) in list_img_pix_dist]
+
         # check the possibility of each pixel starting from the center 
         for x_y in new_list_canvas_pix:
             canvas_x, canvas_y = x_y
@@ -224,6 +230,7 @@ def plot_emoji_cloud_given_relax_ratio(path_img_raw, canvas_img, canvas_w, canva
                 break
             else:
                 list_occupied = []
+
         # remove occupied tuple
         new_list_canvas_pix = list(OrderedSet(new_list_canvas_pix) - OrderedSet(list_occupied))
     return new_canvas_img, count_plot

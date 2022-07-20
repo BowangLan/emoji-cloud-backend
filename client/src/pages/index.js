@@ -17,12 +17,11 @@ import {
   Col,
 } from "antd";
 import FIleReader from "../components/FIleReader";
-// import { useConnection } from "../store";
+import { useConnection } from "../store";
+import EmojiEditor from "../components/EmojiEditor";
+import { ws_url, sample_data, backend_host } from "../constants";
 
-let backend_host = process.env.HOST_IP;
-if (process.env.PRODUCTION === 'TRUE') {
-  backend_host += '/api';
-} 
+
 
 const emoji_vendors = {
   Apple: "Appl",
@@ -53,29 +52,49 @@ export default function Home() {
   const [processing, setProcessing] = useState(false);
   const [resultMsg, setResultMsg] = useState();
   const [formValues, setFormValues] = useState(formInitialValues);
+  const [init, setInit] = useState(true);
   const router = useRouter();
 
   // const ws = useRef();
-  // const { ws, connect } = useConnection((state) => ({ws: state.ws, connect: state.connect}))
+  const { ws, wsState, connect } = useConnection((state) => ({
+    ws: state.ws,
+    wsState: state.wsState,
+    connect: state.connect,
+  }));
   const formRef = useRef();
 
-  const startConnect = (callback) => {
-    ws.current = new WebSocket(`ws://${backend_host}/plot`);
-    ws.current.addEventListener("open", () => {
-      console.log("ws opened");
-      message.success("Connected to the server");
-      if (callback) {
-        callback(ws.current);
-      }
-    });
-    ws.current.addEventListener("close", () => {
-      message.warning("Connection closed");
-      console.log("ws closed");
-    });
-    ws.current.addEventListener("message", handleMessage);
+  const startConnect = () => {
+    console.log("start c");
+    console.log(ws);
+    console.log(wsState);
+    if (wsState === 1 || wsState === 2 || wsState === 0) return;
+    if (ws === null || ws.readyState === 3) {
+      console.log("start c 2");
+      connect(ws_url, eventHandlers);
+    }
   };
 
-  const handleMessage = (e) => {
+  const try_reconnect = () => {
+    console.log("start reconnecting/connecting...");
+    console.log(ws);
+    // setInterval(startConnect, 2000);
+    console.log("after while");
+    // clearInterval(startConnect)
+  };
+
+  const eventHandlers = {
+    open: () => {
+      console.log("ws opened");
+      message.success("Connected to the server");
+    },
+
+    close: () => {
+      message.warning("Connection closed");
+      console.log("ws closed");
+      try_reconnect();
+    },
+
+    message: (e) => {
       console.log("got ws message", e);
       const data = JSON.parse(e.data);
       if (data.e === "ready") {
@@ -83,7 +102,6 @@ export default function Home() {
         setProcessing(() => false);
         message.success("Finish processing");
         setResultMsg(data.msg);
-        // router.push('/result?sid=' + sid);
       } else if (data.e === "sid") {
         setSid(data.data.sid);
         setResultReady(() => false);
@@ -93,13 +111,17 @@ export default function Home() {
         message.error(data.msg);
         setProcessing(() => false);
       }
-  }
+    },
+  };
 
   useEffect(() => {
-    if (!ws.current) {
+    // try_reconnect();
+    if (init) {
+      setInit(false);
+    } else {
       startConnect();
     }
-  }, []);
+  }, [init]);
 
   console.log("render app", { formValues });
 
@@ -110,14 +132,14 @@ export default function Home() {
   const handleSubmit = (e) => {
     console.log("form submit", formValues);
     console.log(e);
-    if (ws.current.readyState === 3) {
+    if (ws.readyState === 3) {
       message.info("Connection closed. Reconnecting...");
       console.log("connection closed. restarting...");
       startConnect((ws) => {
-        sendData(ws, 'plot', formValues);
+        sendData(ws, "plot", formValues);
       });
     } else {
-      sendData(ws.current, 'plot', formValues);
+      sendData(ws, "plot", formValues);
     }
   };
 
@@ -285,13 +307,16 @@ export default function Home() {
                 name="emoji_data"
                 rules={[{ required: true }]}
               >
+                {/* <EmojiEditor /> */}
                 <Input.TextArea
                   placeholder="Enter a Python dictionary here..."
                   style={{ height: "8rem" }}
                   className="code-textarea"
                 />
               </Form.Item>
-              <Row style={{ transform: "translateY(-5px)", marginBottom: '12px' }}>
+              <Row
+                style={{ transform: "translateY(-5px)", marginBottom: "12px" }}
+              >
                 <Col offset={4}>
                   <FIleReader
                     onChange={(value) => {
@@ -312,6 +337,13 @@ export default function Home() {
                     accept={".csv"}
                     text="Import from CSV"
                   ></FIleReader>
+                </Col>
+                <Col offset={4}>
+                  <Button onClick={() => {
+                    const emoji_data = JSON.stringify(sample_data[Math.floor(Math.random()*sample_data.length)]);
+                    setFormValues(old => ({ ...old, emoji_data }));
+                    formRef.current.setFieldsValue({ emoji_data });
+                  }}>Use Sample Data</Button>
                 </Col>
               </Row>
               <Row>
@@ -335,14 +367,20 @@ export default function Home() {
                   >
                     {processing ? (
                       <div>
-                        <span style={{marginRight: '2rem'}}>Processing......</span>
-                        <Button onClick={() => {
-                          sendData(ws.current, 'cancel');
-                          setSid();
-                          setProcessing(false);
-                          setResultReady(false);
-                          message.info('Processing cancelled');
-                        }}>Cancel</Button>
+                        <span style={{ marginRight: "2rem" }}>
+                          Processing......
+                        </span>
+                        <Button
+                          onClick={() => {
+                            sendData(ws.current, "cancel");
+                            setSid();
+                            setProcessing(false);
+                            setResultReady(false);
+                            message.info("Processing cancelled");
+                          }}
+                        >
+                          Cancel
+                        </Button>
                       </div>
                     ) : (
                       resultMsg && <span>{resultMsg}</span>

@@ -51,7 +51,7 @@ def sort_dictionary_by_value(dict_sort, reverse=True):
     return list_tuple_sorted
 
 
-@timeit
+# @timeit
 def parse_image_by_array(im):
     """parse the given image 
 
@@ -75,7 +75,7 @@ def parse_image_by_array(im):
     return dict_opacity
 
 
-@timeit
+# @timeit
 def remove_pixel_outside_bb(im, thold_alpha):
     """remove all pixels outside the bounding box
 

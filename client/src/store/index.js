@@ -1,20 +1,31 @@
 import create from "zustand";
-import { persist } from "zustand/";
+import { persist } from "zustand/middleware";
 
-export const useConnection = create(
-  persist((set, get) => ({
-    ws: null,
-    connect: (url, eventHandlers) => {
-      const ws = new WebSocket(get().url);
+export const useConnection = create((set) => ({
+  ws: null,
+  wsState: null,
+  connect: (url, eventHandlers) => {
+    try {
+      const ws = new WebSocket(url);
+      set({ wsState: 1 });
+      ws.addEventListener('open', () => {
+        set({ wsState: 1 });
+      })
+      ws.addEventListener('close', () => {
+        set({ wsState: 3 });
+      })
       if (eventHandlers) {
         for (const key in eventHandlers) {
-          ws.addEventListener(key, callback, eventHandlers[key]);
+          ws.addEventListener(key, eventHandlers[key]);
         }
       }
+      console.log('set ws', ws);
       set({ ws });
-    },
-  }))
-);
+    } catch (e) {
+      console.error(e);
+    }
+  },
+}));
 
 export const useSID = create(
   persist(

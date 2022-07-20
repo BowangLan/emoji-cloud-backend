@@ -6,23 +6,17 @@ import os
 import io
 import json
 import asyncio
-import redis
+from settings import *
+from myredis import get_redis_instance
 
 
-static_file_dir = 'static'
-
-
-app = Celery(__name__, broker='redis://localhost:6379/0', backend='redis://localhost:6379/0')
+app = Celery(__name__, broker=CELERY_BROKER_URL, backend=CELERY_BACKEND_URL)
 app.conf.update(
     ask_serializer='pickle',
     accept_content=['pickle', 'json']
 )
 
-rd = redis.Redis(
-    host='localhost',
-    port=6379,
-    db=0
-)
+rd = get_redis_instance()
 
 @app.task
 def process_emoji(data, sid: str):
@@ -48,9 +42,3 @@ def process_emoji(data, sid: str):
     return emoji_result
 
 
-@app.task
-def notify_ready(ws):
-    async def send():
-        await ws.send_json({'e': 'ready'})
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(send())

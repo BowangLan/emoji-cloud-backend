@@ -4,31 +4,26 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import asyncio
-import redis
 import uuid
 import io
 import os
 import threading
 
 from mycelery import process_emoji, notify_ready
+from myredis import get_redis_instance
+from settings import *
 
 
-static_file_dir = 'static'
-
-rd = redis.Redis(
-    host='localhost',
-    port=6379,
-    db=0
-)
+rd = get_redis_instance()
 
 app = FastAPI()
 
 if os.environ.get('PRODUCTION') and os.environ.get('PRODUCTION') == 'TRUE':
     origins = []
     if os.environ.get('HOST_IP'):
-        origins.append("http://{}".format(os.environ.get('HOST_IP')))
+        origins.append("http://{}".format(HOST_IP))
     if os.environ.get('DOMAIN'):
-        origins.append("http://{}".format(os.environ.get('DOMAIN')))
+        origins.append("http://{}".format(DOMAIN))
 else:
     origins = [
         "http://localhost",
