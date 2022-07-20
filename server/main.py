@@ -9,7 +9,7 @@ import io
 import os
 import threading
 
-from mycelery import process_emoji, notify_ready
+from mycelery import process_emoji
 from myredis import get_redis_instance
 from settings import *
 
