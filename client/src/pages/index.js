@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { useRouter } from "next/router";
 import { useState, useEffect, useRef } from "react";
 import {
   Input,
@@ -18,20 +17,9 @@ import {
 } from "antd";
 import FIleReader from "../components/FIleReader";
 import { useConnection } from "../store";
-import EmojiEditor from "../components/EmojiEditor";
-import { ws_url, sample_data, backend_host } from "../constants";
+// import EmojiEditor from "../components/EmojiEditor";
+import { ws_url, sample_data, backend_host, emoji_vendors } from "../constants";
 
-
-
-const emoji_vendors = {
-  Apple: "Appl",
-  Google: "Goog",
-  Meta: "FB",
-  Windows: "Wind",
-  Twitter: "Twtr",
-  JoyPixels: "Joy",
-  Samsung: "Sams",
-};
 
 export default function Home() {
   const formInitialValues = {
@@ -53,9 +41,7 @@ export default function Home() {
   const [resultMsg, setResultMsg] = useState();
   const [formValues, setFormValues] = useState(formInitialValues);
   const [init, setInit] = useState(true);
-  const router = useRouter();
 
-  // const ws = useRef();
   const { ws, wsState, connect } = useConnection((state) => ({
     ws: state.ws,
     wsState: state.wsState,
@@ -372,7 +358,7 @@ export default function Home() {
                         </span>
                         <Button
                           onClick={() => {
-                            sendData(ws.current, "cancel");
+                            sendData(ws, "cancel");
                             setSid();
                             setProcessing(false);
                             setResultReady(false);

@@ -8,3 +8,13 @@ export const sample_data = [
 export const backend_host = process.env.DEV === 'TRUE' ? process.env.HOST_IP : process.env.HOST_IP + "/api";
 
 export const ws_url = `ws://${backend_host}/plot`;
+
+const emoji_vendors = {
+  Apple: "Appl",
+  Google: "Goog",
+  Meta: "FB",
+  Windows: "Wind",
+  Twitter: "Twtr",
+  JoyPixels: "Joy",
+  Samsung: "Sams",
+};
