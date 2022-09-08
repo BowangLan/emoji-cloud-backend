@@ -3,7 +3,7 @@
 
 ## Introduction
 
-This repository contains code for the backend of the EmojiCloud website. It is divided into two parts: the main server and the worker, with some shared code. During deployment of both the main and the worker, you have to clone the entire repository, and run `setup.sh` first and then run `server_start.sh` to start the main server or `worker_start.sh` to start the worker.
+This repository contains code for the backend of the EmojiCloud website. It is divided into two parts: the main server and the worker, with some shared code. During deployments of both the main server and the worker, you have to clone the entire repository, and run `setup.sh` first and then run `server_start.sh` to start the main server or `worker_start.sh` to start the worker.
 
 ## Getting Started
 
