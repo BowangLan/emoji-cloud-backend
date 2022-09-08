@@ -1,0 +1,1 @@
+pm2 start "python3 -m celery -A mycelery worker--loglevel=info --without-heartbeat --without-gossip --without-mingle --concurrency 4" --name celery
