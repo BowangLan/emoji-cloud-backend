@@ -1,8 +1,9 @@
+import os
 
 # redis config
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
-REDIS_DB = 0
+REDIS_HOST = os.environ.get('REDIS_HOST') or 'localhost'
+REDIS_PORT = os.environ.get('REDIS_PORT') or 6379
+REDIS_DB = os.environ.get('REDIS_DB') or 0
 
 CANCELLED_TASK_REDIS_KEY = 'cancelled_tasks'
 RUNNING_TASK_REDIS_KEY = 'running_tasks'
